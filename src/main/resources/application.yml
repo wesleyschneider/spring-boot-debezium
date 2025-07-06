@@ -1,8 +1,22 @@
 spring:
   datasource:
-    url: jdbc:sqlserver://localhost:1433;databaseName=NEW_DATABASE;encrypt=false
+    url: jdbc:sqlserver://localhost:1433;databaseName=DEBEZIUM_CDC;encrypt=false
     username: sa
     password: Abcd1234
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     show-sql: true
+  logging:
+    level:
+      org:
+        hibernate:
+          SQL: DEBUG
+          type.descriptor.sql: TRACE
+debezium:
+  database:
+    hostname: localhost
+    port: 1433
+    user: sa
+    password: Abcd1234
+    names: DEBEZIUM_CDC
+    tableList: dbo.Estudante, target.usuario, target.usuario_email

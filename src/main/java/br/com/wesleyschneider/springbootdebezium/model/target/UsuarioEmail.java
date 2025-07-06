@@ -1,13 +1,15 @@
-package br.com.wesleyschneider.springbootdebezium.model.new_database;
+package br.com.wesleyschneider.springbootdebezium.model.target;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @Entity
-@Table(name = "usuario_email")
+@Table(name = "usuario_email", schema = "target")
 public class UsuarioEmail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,6 +18,9 @@ public class UsuarioEmail {
 
     @Column(name = "email")
     private String email;
+
+    @Column(name = "dt_alteracao")
+    private LocalDateTime dataAlteracao;
 
     @ManyToOne
     @JoinColumn(name = "cd_usuario")

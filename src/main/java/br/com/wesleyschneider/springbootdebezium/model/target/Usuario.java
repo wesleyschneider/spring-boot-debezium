@@ -1,15 +1,16 @@
-package br.com.wesleyschneider.springbootdebezium.model.new_database;
+package br.com.wesleyschneider.springbootdebezium.model.target;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "usuario")
+@Table(name = "usuario", schema = "target")
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +26,9 @@ public class Usuario {
     @Column(name = "cd_estudante")
     private int cdEstudante;
 
-    @OneToMany(mappedBy = "usuario")
+    @Column(name = "dt_alteracao")
+    private LocalDateTime dataAlteracao;
+
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.EAGER)
     private List<UsuarioEmail> emails;
 }

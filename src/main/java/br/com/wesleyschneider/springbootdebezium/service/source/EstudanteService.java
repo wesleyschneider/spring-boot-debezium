@@ -1,18 +1,22 @@
-package br.com.wesleyschneider.springbootdebezium.service;
+package br.com.wesleyschneider.springbootdebezium.service.source;
 
-import br.com.wesleyschneider.springbootdebezium.model.new_database.Usuario;
-import br.com.wesleyschneider.springbootdebezium.model.new_database.UsuarioEmail;
-import br.com.wesleyschneider.springbootdebezium.model.old_database.Estudante;
-import br.com.wesleyschneider.springbootdebezium.repository.UsuarioEmailRepository;
-import br.com.wesleyschneider.springbootdebezium.repository.UsuarioRepository;
+import br.com.wesleyschneider.springbootdebezium.mapper.source.EstudanteMapper;
+import br.com.wesleyschneider.springbootdebezium.model.source.Estudante;
+import br.com.wesleyschneider.springbootdebezium.model.target.Usuario;
+import br.com.wesleyschneider.springbootdebezium.model.target.UsuarioEmail;
+import br.com.wesleyschneider.springbootdebezium.repository.target.UsuarioEmailRepository;
+import br.com.wesleyschneider.springbootdebezium.repository.target.UsuarioRepository;
+import br.com.wesleyschneider.springbootdebezium.service.CreateService;
+import br.com.wesleyschneider.springbootdebezium.service.UpdateService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
-@Service
-public class EstudanteService {
+@Service(value = "EstudanteService")
+public class EstudanteService implements CreateService, UpdateService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
@@ -21,18 +25,19 @@ public class EstudanteService {
 
     @Transactional
     public void create(Map<String, Object> payload) {
-        var estudante = getEstudante(payload);
+        var estudante = EstudanteMapper.map(payload);
 
         var usuario = new Usuario();
+        usuario.setDataAlteracao(LocalDateTime.now());
 
         updateUsuario(usuario, estudante);
     }
 
     @Transactional
     public void update(Map<String, Object> payload) {
-        var estudante = getEstudante(payload);
+        var estudante = EstudanteMapper.map(payload);
 
-        var usuarioOptional = usuarioRepository.findByCdEstudante(estudante.getCdEstudante());
+        var usuarioOptional = usuarioRepository.findByCdEstudanteAndDataAlteracaoBefore(estudante.getCdEstudante(), estudante.getDataAlteracaoCdc());
 
         if (usuarioOptional.isEmpty()) {
             return;
@@ -43,15 +48,11 @@ public class EstudanteService {
         updateUsuario(usuario, estudante);
     }
 
-    @Transactional
-    public void delete() {
-
-    }
-
     private void updateUsuario(Usuario usuario, Estudante estudante) {
         usuario.setNome(estudante.getNome());
         usuario.setNomeSocial(estudante.getNomeSocial());
         usuario.setCdEstudante(estudante.getCdEstudante());
+        usuario.setDataAlteracao(estudante.getDataAlteracaoCdc());
 
         usuarioRepository.save(usuario);
 
@@ -69,17 +70,9 @@ public class EstudanteService {
         }
 
         email.setEmail(estudanteEmail);
+        email.setDataAlteracao(estudante.getDataAlteracaoCdc());
         email.setUsuario(usuario);
 
         usuarioEmailRepository.save(email);
-    }
-
-    private Estudante getEstudante(Map<String, Object> payload) {
-        return new Estudante(
-                Integer.parseInt(payload.get("cd_estudante").toString()),
-                payload.get("nome").toString(),
-                payload.get("nome_social").toString(),
-                payload.get("email").toString()
-        );
     }
 }
